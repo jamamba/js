@@ -9,24 +9,25 @@ GAME RULES:
 
 */
 
-var scores, roundScore, activePlayer, gamePlaying, previousDice, dice, winningScore, isScoresSet;
+var scores, roundScore, activePlayer, gamePlaying, previousDice, dice, winningScore, isScoresSet, needChangePlayer;
 
 
 function init() {
 
-            dice = 0;
+            dice = [0, 0];
             scores = [0, 0];
             roundScore = 0;
             activePlayer = 0;
             gamePlaying = true;
-            previousDice = 0;
+            previousDice = [0,0];
             isScoresSet = false;// для проверки, ввёл ли я значение выигрыша
-            
+            needChangePlayer = false;
             
             
 
 
-            document.querySelector('.dice').style.display = 'none';
+            document.querySelector('.dice-1').style.display = 'none';
+            document.querySelector('.dice-2').style.display = 'none';
 
             document.getElementById('score-0').textContent = '0';
             document.getElementById('score-1').textContent = '0';
@@ -90,45 +91,72 @@ document.querySelector('.btn-roll').addEventListener('click', function(){
 
             // валидно? - делаю init
             else {
-                    isScoresSet = true;
-                    winingScoreDOM.style.border = '1px solid #777';
-                    winingScoreDOM.style.color = 'inherit';
-
-                    //1. random number
-                    previousDice = dice;
-                    dice =  Math.ceil(Math.random()*6);
-                    console.log('previous: ' + previousDice + ' current: ' + dice);
-
-                    //2. display result
-                    var diceDOM = document.querySelector('.dice');
-                    diceDOM.style.display = 'block';
-                    diceDOM.src = 'dice-' + dice + '.png';
-
-
-                    //3. update the round score if not 1
-                    if (dice !== 1){
-                        //add score
-                        roundScore += dice;
-                        document.querySelector('#current-' + activePlayer).textContent = roundScore;
-
-
-
-                        if (dice === 6 && previousDice === 6) {
-                            scores[activePlayer] = 0;
-                            document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
-
-                            nextPlayer();
-                        }
+                    if (needChangePlayer === true) {
+                        document.getElementById('button-text').textContent = "Roll dice";
+                        nextPlayer();
+                        
                     }
+                
                     else {
-                        //next player
+                        
+                        isScoresSet = true;
+                        winingScoreDOM.style.border = '1px solid #777';
+                        winingScoreDOM.style.color = 'inherit';
+
+                        //1. random number
+                        previousDice[0] = dice[0];
+                        previousDice[1] = dice[1];
+
+                        dice[0] = Math.ceil(Math.random()*6);
+                        dice[1] = Math.ceil(Math.random()*6);
+                        console.log('previous1: ' + previousDice[0] + ' current1: ' + dice[0]);
+                        console.log('previous2: ' + previousDice[1] + ' current2: ' + dice[1]);
+
+                        //2. display result
+                        var dice1DOM = document.querySelector('.dice-1');
+                        var dice2DOM = document.querySelector('.dice-2');
+
+                        dice1DOM.style.display = 'block';
+                        dice2DOM.style.display = 'block';
+
+                        dice1DOM.src = 'dice-' + dice[0] + '.png';
+                        dice2DOM.src = 'dice-' + dice[1] + '.png';
+
+
+                        //3. update the round score if not 1
+                        if (dice[0] !== 1 && dice[1]!== 1){
+                            //add score
+                            roundScore += dice[0] + dice[1];
+                            document.querySelector('#current-' + activePlayer).textContent = roundScore;
+
+
+
+                            if (dice[0] === 6 && previousDice[0] === 6 && dice[1] === 6 && previousDice[1] === 6) {
+                                scores[activePlayer] = 0;
+                                document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
+
+                                needChangePlayer = true;
+
+                                document.getElementById('button-text').textContent = "Next Player!";
+
+                                //nextPlayer();
+                            }
+                        }
+                        else {
+                            //next player
+                            needChangePlayer = true;
+                            document.getElementById('button-text').textContent = "Next Player!";
 
 
 
 
-                         nextPlayer();
+
+                             //nextPlayer();
+                        }
+
                     }
-
+                
+                    
                 //store dice as previousDice
             }
     }
@@ -137,7 +165,7 @@ document.querySelector('.btn-roll').addEventListener('click', function(){
 
 
 document.querySelector('.btn-hold').addEventListener('click', function() {
-    if (gamePlaying && isScoresSet){
+    if (gamePlaying && isScoresSet && needChangePlayer===false){
         //add current csore to user global score
         scores[activePlayer] += roundScore;
     
@@ -180,24 +208,37 @@ document.querySelector('.btn-hold').addEventListener('click', function() {
 function nextPlayer() {
     //next player
     
-    //document.querySelector('#current-' + activePlayer).textContent = roundScore; - МОЯ РЕАЛИЗАЦИЯ ОБНУЛЕНИЯ ПРИ 1. Обнуляю только текущего. roundScore = 0; должен быть выше этой строки. Но оставил вариант - как дальше, по уроку  
-    
-    activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
-    roundScore = 0;
-    previousDice = 0;
-    dice = 0;
+    //document.querySelector('#current-' + activePlayer).textContent = roundScore; - МОЯ РЕАЛИЗАЦИЯ ОБНУЛЕНИЯ ПРИ 1. Обнуляю только текущего. roundScore = 0; должен быть выше этой строки. Но оставил вариант - как дальше, по уроку  i
+    if (needChangePlayer = true) {
         
-    document.getElementById('current-0').textContent = '0';
-    document.getElementById('current-1').textContent = '0';
+         activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
+        roundScore = 0;
+        document.getElementById('button-text').textContent = "Roll dice";
+        
 
+        previousDice[0] = 0;
+        previousDice[1] = 0;
+        dice[0] = 0;
+        dice[1] = 0;
+
+        document.getElementById('current-0').textContent = '0';
+        document.getElementById('current-1').textContent = '0';
         
-    document.querySelector('.player-0-panel').classList.toggle('active');
-    document.querySelector('.player-1-panel').classList.toggle('active');
+        document.querySelector('.dice-1').style.display = 'none';
+        document.querySelector('.dice-2').style.display = 'none';
+
+        document.querySelector('.player-0-panel').classList.toggle('active');
+        document.querySelector('.player-1-panel').classList.toggle('active');
+        needChangePlayer = false;
+    }
+    
+   
         
     //document.querySelector('.player-0-panel').classList.remove('active');
     //document.querySelector('.player-1-panel').classList.add('active');
 
-    document.querySelector('.dice').style.display = 'none';
+   // document.querySelector('.dice-1').style.display = 'none';
+   // document.querySelector('.dice-2').style.display = 'none'
 }
 
 
